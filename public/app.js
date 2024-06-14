@@ -124,7 +124,25 @@ async function joinRoomById(roomId) {
     });
 
     // Code for collecting ICE candidates below
-
+    async function collectIceCandidates(roomRef, peerConnection, localName) {
+      const candidatesCollection = roomRef.collection(localName);
+    
+      peerConnection.addEventListener('icecandidate', event => {
+        if (event.candidate) {
+          const json = event.candidate.toJSON();
+          candidatesCollection.add(json);
+        }
+      });
+    
+      roomRef.collection(localName).onSnapshot(snapshot => {
+        snapshot.docChanges().forEach(change => {
+          if (change.type === "added") {
+            const candidate = new RTCIceCandidate(change.doc.data());
+            peerConnection.addIceCandidate(candidate);
+          }
+        });
+      });
+    }
     // Code for collecting ICE candidates above
 
     peerConnection.addEventListener('track', event => {
