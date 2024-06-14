@@ -57,7 +57,10 @@ async function createRoom() {
     peerConnection.addTrack(track, localStream);
   });
 
-  // Code for creating a room below
+
+
+
+  // Code for collecting ICE candidates below
   roomRef.onSnapshot(async snapshot => {
     console.log('Got updated room:', snapshot.data());
     const data = snapshot.data();
@@ -67,33 +70,23 @@ async function createRoom() {
         await peerConnection.setRemoteDescription(answer);
     }
   });
-  // Code for creating a room above
 
-  // Code for collecting ICE candidates below
-  const Offer = roomSnapshot.data().offer;
-  await peerConnection.setRemoteDescription(Offer);
-  const answer = await peerConnection.createAnswer();
-  await peerConnection.setLocalDescription(answer);
-
-  const roomWithAnswer = {
-      answer: {
-          type: answer.type,
-          sdp: answer.sdp
-      }
-  }
 await roomRef.update(roomWithAnswer);
   // Code for collecting ICE candidates above
 
-  peerConnection.addEventListener('track', event => {
-    console.log('Got remote track:', event.streams[0]);
-    event.streams[0].getTracks().forEach(track => {
-      console.log('Add a track to the remoteStream:', track);
-      remoteStream.addTrack(track);
-    });
-  });
-
   // Listening for remote session description below
+  const Offer = roomSnapshot.data().offer;
+await peerConnection.setRemoteDescription(Offer);
+const answer = await peerConnection.createAnswer();
+await peerConnection.setLocalDescription(answer);
 
+const roomWithAnswer = {
+    answer: {
+        type: answer.type,
+        sdp: answer.sdp
+    }
+}
+await roomRef.update(roomWithAnswer);
   // Listening for remote session description above
 
   // Listen for remote ICE candidates below
