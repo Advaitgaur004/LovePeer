@@ -70,7 +70,18 @@ async function createRoom() {
   // Code for creating a room above
 
   // Code for collecting ICE candidates below
+  const Offer = roomSnapshot.data().offer;
+  await peerConnection.setRemoteDescription(Offer);
+  const answer = await peerConnection.createAnswer();
+  await peerConnection.setLocalDescription(answer);
 
+  const roomWithAnswer = {
+      answer: {
+          type: answer.type,
+          sdp: answer.sdp
+      }
+  }
+await roomRef.update(roomWithAnswer);
   // Code for collecting ICE candidates above
 
   peerConnection.addEventListener('track', event => {
